@@ -1,0 +1,1 @@
+{"name":"tacholog-personal","version":"1.0.0-alpha","private":true,"type":"module","description":"Diario personale tachigrafo offline (importatore DDD: archivio, non decoder)","scripts":{"test":"TZ=Europe/Rome node --test test/*.test.mjs","start":"python3 -m http.server 4173"}}

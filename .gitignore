@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.ddd
+*.DDD
+*backup*.json
+*.csv
+.DS_Store
+Thumbs.db

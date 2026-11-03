@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'" />
+  <meta name="theme-color" content="#0d1825" />
+  <meta name="description" content="TachoLog: diario personale offline per attività tachigrafiche e archivio file DDD." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>TachoLog — Diario personale</title>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brandmark" aria-hidden="true">T</span><div><b>TachoLog</b><small>Diario dell'autista</small></div></div>
+      <span class="privacy-status"><span class="dot"></span> Locale e offline</span>
+    </header>
+    <main>
+      <section id="home" class="page active" aria-label="Riepilogo">
+        <div class="hero"><p class="eyebrow">RIEPILOGO PERSONALE</p><h1>La tua giornata,<br><em>sotto controllo.</em></h1><p>Attività manuali e file tachigrafici in un unico posto.</p></div>
+        <div class="datebar"><label for="summaryDate">Giorno visualizzato</label><input id="summaryDate" type="date" /></div>
+        <div class="summary-grid">
+          <article class="metric metric-main"><div class="metric-label">Guida nel giorno civile <span class="icon-circle">↗</span></div><strong id="todayDrive">0h 00m</strong><div class="bar-track"><div id="dailyBar" class="bar-fill"></div></div><p id="dailyNote">Riferimento indicativo: 9h ordinarie</p></article>
+          <article class="metric"><div class="metric-label">Settimana (lun–dom)</div><strong id="weekDrive">0h 00m</strong><p>Riferimento 56h</p></article>
+          <article class="metric"><div class="metric-label">Due settimane consecutive</div><strong id="fortnightDrive">0h 00m</strong><p>Precedente + corrente · 90h</p></article>
+        </div>
+        <h2 class="section-heading">Altre attività del giorno</h2>
+        <div class="pill-stats"><div><span class="small-dot work"></span><span>Altri lavori</span><b id="todayWork">0h 00m</b></div><div><span class="small-dot available"></span><span>Disponibilità</span><b id="todayAvailable">0h 00m</b></div><div><span class="small-dot rest"></span><span>Pausa/riposo</span><b id="todayRest">0h 00m</b></div></div>
+        <div class="notice"><b>Attenzione ai calcoli</b><p>I totali sono per giorno civile e settimana calendario. Non rappresentano un controllo completo dei periodi legali di guida, pause e riposi. Il tachigrafo omologato rimane il riferimento.</p></div>
+        <div class="quick-row"><button class="primary" data-go="manual">+ Nuova attività</button><button class="secondary" data-go="ddd">Importa DDD</button></div>
+      </section>
+      <section id="manual" class="page" aria-label="Registrazione manuale">
+        <div class="section-intro"><p class="eyebrow">INSERIMENTO MANUALE</p><h1>Registra attività</h1><p>Inserisci gli intervalli reali. Evita modifiche durante la guida.</p></div>
+        <div id="livePanel" class="live-panel"><div><div class="live-dot"></div><span id="liveState">Nessuna attività in corso</span></div><button id="liveButton" class="secondary small">Avvia ora</button></div>
+        <form id="activityForm" class="form-card">
+          <label for="activityType">Attività</label>
+          <select id="activityType" required><option value="drive">🚚 Guida</option><option value="work">🔧 Altri lavori</option><option value="available">⏳ Disponibilità</option><option value="rest">☕ Pausa / riposo</option></select>
+          <div class="form-columns"><div><label for="startTime">Inizio</label><input id="startTime" type="datetime-local" required /></div><div><label for="endTime">Fine</label><input id="endTime" type="datetime-local" required /></div></div>
+          <label for="notes">Nota (facoltativa)</label><textarea id="notes" rows="3" maxlength="600" placeholder="Es. Carico container, sosta, viaggio..."></textarea>
+          <button class="primary" type="submit">Salva attività</button><p class="fine-print">Le sovrapposizioni vengono bloccate. Sono supportati intervalli oltre la mezzanotte.</p>
+        </form>
+      </section>
+      <section id="history" class="page" aria-label="Registro e storico">
+        <div class="section-intro"><p class="eyebrow">STORICO</p><h1>Le tue registrazioni</h1><p>Ogni intervallo è conservato sul dispositivo.</p></div>
+        <div class="datebar"><label for="historyDate">Mostra giorno</label><input id="historyDate" type="date" /></div>
+        <div id="activityList" class="activity-list"></div>
+      </section>
+      <section id="ddd" class="page" aria-label="Archivio DDD">
+        <div class="section-intro"><p class="eyebrow">ARCHIVIO FILE ORIGINALI</p><h1>Importa .DDD</h1><p>Conserva i file originali della carta conducente sul dispositivo.</p></div>
+        <div class="upload-zone"><div class="upload-symbol">↥</div><h2>Seleziona un file .DDD</h2><p>Dal telefono, dal PC o dalla memoria esterna</p><label class="primary file-button" for="dddInput">Scegli file DDD</label><input id="dddInput" type="file" accept=".ddd,.DDD,application/octet-stream" multiple hidden /><small>Dimensione massima: 15 MB per file</small></div>
+        <div class="notice important"><b>Decodifica non ancora attiva in questa versione</b><p>L'importazione archivia il file originale e ne calcola l'impronta SHA-256; <strong>non</strong> estrae ancora attività, non verifica firme tachigrafiche e non aggiorna automaticamente i conteggi. Non è un'importazione analitica completa.</p></div>
+        <h2 class="section-heading">File archiviati <span id="dddCount" class="count">0</span></h2><div id="dddList" class="activity-list"></div>
+      </section>
+      <section id="settings" class="page" aria-label="Backup e impostazioni">
+        <div class="section-intro"><p class="eyebrow">GESTIONE DATI</p><h1>Backup e privacy</h1><p>I dati restano su questo dispositivo: nessun server o cloud è collegato.</p></div>
+        <div class="settings-card"><h2>Esporta attività CSV</h2><p>Scarica il registro manuale per Excel o altri programmi.</p><button id="csvButton" class="secondary">Scarica CSV</button></div>
+        <div class="settings-card"><h2>Backup completo cifrato</h2><p>Include le attività manuali e i file DDD originali. Proteggilo con una password di almeno 12 caratteri: senza di essa non è possibile ripristinarlo.</p><label for="backupPassword">Password backup</label><input type="password" id="backupPassword" autocomplete="new-password" minlength="12" placeholder="Almeno 12 caratteri" /><button id="backupButton" class="primary">Crea backup cifrato</button></div>
+        <div class="settings-card"><h2>Ripristina backup</h2><p>Attenzione: il ripristino sostituisce le attività e i DDD già presenti su questo dispositivo.</p><label for="restoreFile">Seleziona backup TachoLog</label><input type="file" id="restoreFile" accept=".json,application/json" /><label for="restorePassword">Password del backup</label><input type="password" id="restorePassword" /><button id="restoreButton" class="secondary">Ripristina</button></div>
+        <div class="settings-card danger"><h2>Elimina dati locali</h2><p>Operazione irreversibile senza un backup. Elimina anche i DDD archiviati.</p><button id="eraseButton" class="danger-button">Cancella tutti i dati</button></div>
+        <div class="notice"><b>Limitazione del salvataggio locale</b><p>Se cancelli i dati del browser, usi la navigazione privata o cambi telefono, potresti perdere il registro. Esegui regolarmente un backup cifrato. La sincronizzazione cloud non è ancora implementata.</p></div>
+      </section>
+    </main>
+    <nav class="bottom-nav" aria-label="Navigazione">
+      <button data-go="home" class="selected" aria-current="page"><span>▦</span>Riepilogo</button>
+      <button data-go="manual"><span>＋</span>Manuale</button>
+      <button data-go="history"><span>☷</span>Storico</button>
+      <button data-go="ddd"><span>⇧</span>DDD</button>
+      <button data-go="settings"><span>⚙</span>Dati</button>
+    </nav>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./src/main.mjs"></script>
+</body>
+</html>
