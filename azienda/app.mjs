@@ -1,7 +1,8 @@
 import {DEMO,ROLE_NAV,STATUS_LABELS,STATUS_CLASS,visibleDrivers,visibleDownloads,searchDrivers,filterDownloads,dueLabel} from './model.mjs';
+import {HOURS_DEMO,HOURS_DEMO_PERIOD,HOUR_LIMITS,HOUR_STATUS,minutesLabel,summarizeFleetHours} from './hours.mjs';
 
 const $ = id => document.getElementById(id);
-const state = {role:'admin',page:'dashboard',search:'',status:'all',selectedDriver:null};
+const state = {role:'admin',page:'dashboard',search:'',status:'all',selectedDriver:null,hourFilter:'all',hourDriver:null};
 const DEMO_SESSION = role => ({role, orgId:DEMO.org.id, driverId:'drv-001', drivers:DEMO.drivers});
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const icon = (name,size=19) => {
@@ -45,8 +46,29 @@ function renderAdminDashboard(){
   const check=DEMO.drivers.filter(d=>dueLabel(d.downloadDue).tone!=='good');
   return kicker('PANORAMICA AZIENDALE','Il controllo della flotta, in un solo posto.','Monitora scarichi, conducenti e dispositivi. Qui sono mostrati esclusivamente esempi.')+banner()+
   `<div class="kpi-grid">${metric('Autisti presenti',DEMO.drivers.length,'Anagrafica simulata','users')}${metric('File DDD di esempio',DEMO.downloads.length,'Nessun DDD reale','file-down')}${metric('Reader configurabili',DEMO.readers.length,'Hardware non collegato','radio-tower')}${metric('Scadenze da verificare',check.length,'Calcolo illustrativo','calendar-days','amber')}</div>`+
+  `<div class="hours-entry"><div><strong>Controllo ore di guida</strong><p>Individua rapidamente dati incompleti e possibili superamenti da esaminare.</p></div><button class="secondary-btn" type="button" data-nav="hours">Apri situazione ore →</button></div>`+
   `<div class="two-columns">${panel('Ultimi scarichi','Stati simulati per progettare il flusso',tableWrap(['Autista','Data','Stato',''],rows))}`+
   `${panel('Come funzionerà','Le fasi della piattaforma',`<div class="steps"><div><span>01</span><div><b>Scarico carta</b><p>Il Reader acquisisce il DDD firmato.</p></div></div><div><span>02</span><div><b>Verifica e archiviazione</b><p>Il server controlla integrità, autorizzazioni e origine.</p></div></div><div><span>03</span><div><b>Area personale</b><p>Ogni autista vede soltanto i propri dati autorizzati.</p></div></div></div><div class="callout">${icon('lock',18)} Autenticazione e server ancora da sviluppare.</div>`)}</div>`;
+}
+function renderHours(){
+  const results=summarizeFleetHours(HOURS_DEMO,DEMO.drivers,DEMO.org.id);
+  const filters={all:'Tutti',candidate:'Possibili superamenti',review:'Da approfondire',incomplete:'Dati parziali o assenti','no-signal':'Senza anomalie numeriche'};
+  const rows=results.rows.filter(x=>state.hourFilter==='all'||(state.hourFilter==='incomplete'?['incomplete','missing'].includes(x.status):x.status===state.hourFilter));
+  const ddd=status=>status==='candidate'?'Da verificare':status==='incomplete'?'Parziale':status==='missing'?'Assente':'Esempio';
+  const tableRows=rows.map(x=>{
+    const status=HOUR_STATUS[x.status], driver=DEMO.drivers.find(d=>d.id===x.driverId);
+    const cell=(value,limit)=>value===null?'<span class="table-muted">Non disponibile</span>':`<div class="hour-value"><b>${minutesLabel(value)}</b>${limit?`<div class="hour-track"><span style="width:${Math.min(100,100*value/limit)}%;${value>limit?'background:#cb4752':''}"></span></div>`:''}</div>`;
+    return `<tr><td><b>${esc(driver?.label)}</b><span class="table-muted">${esc(driver?.code)} · Dati inventati</span></td><td>${cell(x.weeklyMinutes,HOUR_LIMITS.weekly)}</td><td>${cell(x.fortnightMinutes,x.complete?HOUR_LIMITS.fortnight:null)}</td><td>${cell(x.maxCivilDayMinutes,null)}</td><td>${badge(status.text,status.tone)}<span class="table-muted">${ddd(x.status)}</span></td><td><button type="button" class="link-btn" data-hour-driver="${esc(x.driverId)}">Dettaglio ${icon('arrow',15)}</button></td></tr>`;
+  });
+  const selected=results.rows.find(x=>x.driverId===state.hourDriver);
+  const driver=selected&&DEMO.drivers.find(d=>d.id===selected.driverId);
+  return kicker('SITUAZIONE AUTISTI','Controllo ore e possibili infrazioni','Confronto dei tempi di guida, anomalie da verificare e periodi non coperti dagli scarichi.')+banner()+
+    `<div class="kpi-grid">${metric('Possibili superamenti',results.summary.candidates,'Richiedono verifica manuale','alert','amber')}${metric('Altre segnalazioni',results.summary.review,'Soglie vicine o estensioni','clock-3')}${metric('Dati incompleti',results.summary.incomplete,'Non classificare come regolari','archive','amber')}${metric('Senza anomalie numeriche',results.summary.withoutSignals,'Non significa conformità','shield')}</div>`+
+    `<div class="hours-warning">${icon('shield',20)}<div><b>Non sono infrazioni accertate.</b><p>I valori sono inventati per la demo. Il giorno civile non equivale al periodo giornaliero legale. Pause, riposi, estensioni, deroghe e firme DDD non sono verificati. Non usare questa pagina per contestazioni o provvedimenti.</p></div></div>`+
+    `<div class="filters"><label class="select-filter">Mostra <select id="hour-filter" aria-label="Filtra autisti per segnalazione">${Object.entries(filters).map(([k,v])=>`<option value="${k}" ${state.hourFilter===k?'selected':''}>${v}</option>`).join('')}</select></label><span class="filter-hint">${rows.length} autisti su ${results.rows.length}</span></div>`+
+    panel('Situazione ore per autista',`Settimana ${HOURS_DEMO_PERIOD.current} · Due settimane ${HOURS_DEMO_PERIOD.fortnight}`,tableWrap(['Autista','Guida settimana / 56h','Guida due settimane / 90h','Giorno civile massimo','Esito preliminare',''],tableRows,'Nessun autista con questo filtro.'))+
+    (selected?`<section class="hours-detail" id="hour-detail"><div class="hours-detail-header"><div><span class="eyebrow">DETTAGLIO DIMOSTRATIVO</span><h2>${esc(driver?.label)}</h2><p>Ultima settimana: ${minutesLabel(selected.weeklyMinutes)} · Precedente: ${minutesLabel(selected.previousWeekMinutes)}</p></div><button type="button" class="secondary-btn" id="close-hour-detail">Chiudi</button></div><div class="hour-findings">${selected.issues.length?selected.issues.map(issue=>`<article><span class="status ${issue.priority==='high'?'bad':'pending'}">${issue.priority==='high'?'Da verificare':issue.priority==='missing'?'Dati insufficienti':'Promemoria'}</span><div><b>${esc(issue.label)}</b><p>${esc(issue.explain)}</p></div></article>`).join(''):'<p>Nessuna soglia numerica di questa demo superata. Non implica conformità.</p>'}</div><p class="hour-provenance">Fonte: simulazione · ${esc(selected.notes)}. Il software non ha ancora un decoder DDD certificato o un motore di conformità completo.</p></section>`:'')+
+    `<div class="hours-next">${icon('file-down',20)}<div><b>Per calcolare situazioni reali servono DDD decodificati e verificati.</b><p>Il prossimo passo è collegare un backend privato con dati completi, ricostruzione dei periodi legali, revisione umana e tracciamento delle giustificazioni.</p></div></div>`;
 }
 function renderDrivers(){
  const drivers=searchDrivers(visibleDrivers(DEMO.drivers,DEMO_SESSION('admin')),state.search);
@@ -96,7 +118,7 @@ function renderRest(){return kicker('MONITORAGGIO','Guida e riposi','Riepiloghi 
 function renderSettings(){return kicker('ACCOUNT',state.role==='admin'?'Impostazioni aziendali':'Il mio profilo','Le credenziali e i permessi saranno disponibili con l’autenticazione server.')+banner()+panel('Prima la sicurezza','Funzioni essenziali per il rilascio aziendale',`<div class="security-list"><div>${icon('lock')}<span>Login con sessioni sicure e ruoli verificati sul server</span></div><div>${icon('shield')}<span>Isolamento dei dati per azienda e per autista</span></div><div>${icon('archive')}<span>Archiviazione privata e backup dei file DDD originali</span></div><div>${icon('activity')}<span>Audit log, revoca dispositivi e protezioni contro abusi</span></div></div>`)+`<div class="callout spacious">${icon('alert')} Non usare dati reali in questa anteprima pubblica.</div>`;}
 function view(){
  if(state.role==='driver')return state.page==='activities'?renderDriverActivities():state.page==='downloads'?renderDownloads():state.page==='rest'?renderRest():state.page==='settings'?renderSettings():renderDriverDashboard();
- switch(state.page){case'drivers':return renderDrivers();case'downloads':return renderDownloads();case'readers':return renderReaders();case'vehicles':return renderVehicles();case'deadlines':return renderDeadlines();case'settings':return renderSettings();default:return renderAdminDashboard();}
+ switch(state.page){case'hours':return renderHours();case'drivers':return renderDrivers();case'downloads':return renderDownloads();case'readers':return renderReaders();case'vehicles':return renderVehicles();case'deadlines':return renderDeadlines();case'settings':return renderSettings();default:return renderAdminDashboard();}
 }
 function navMarkup(item){const [id,label,glyph]=item;return `<button type="button" class="nav-item ${state.page===id?'active':''}" data-nav="${id}" ${state.page===id?'aria-current="page"':''}>${icon(glyph,18)}<span>${esc(label)}</span></button>`;}
 function render(){
@@ -108,8 +130,10 @@ function render(){
  $('content').innerHTML=view();
  bindPage();
 }
-function navigate(page){if(!ROLE_NAV[state.role].some(x=>x[0]===page))return;state.page=page;state.selectedDriver=null;location.hash=`${state.role}/${page}`;render();window.scrollTo(0,0);}
+function navigate(page){if(!ROLE_NAV[state.role].some(x=>x[0]===page))return;state.page=page;state.selectedDriver=null;state.hourDriver=null;location.hash=`${state.role}/${page}`;render();window.scrollTo(0,0);}
 function bindPage(){
+ const hourFilter=$('hour-filter');if(hourFilter)hourFilter.addEventListener('change',()=>{state.hourFilter=hourFilter.value;state.hourDriver=null;render();});
+ const closeHour=$('close-hour-detail');if(closeHour)closeHour.addEventListener('click',()=>{state.hourDriver=null;render();});
  const input=$('driver-search');if(input){input.addEventListener('input',()=>{const position=input.selectionStart;state.search=input.value;const rows=searchDrivers(visibleDrivers(DEMO.drivers,DEMO_SESSION('admin')),state.search).map(d=>`<tr><td><b>${esc(d.label)}</b><span class="table-muted">${esc(d.code)}</span></td><td>${esc(d.vehicle)}</td><td>${d.downloadDue?shortDate(`${d.downloadDue}T12:00:00`):'Non disponibile'}</td><td>${badge(d.active?'Attivo':'Disattivato',d.active?'good':'neutral')}</td><td><button class="link-btn" type="button" data-driver="${esc(d.id)}">Dettagli ${icon('arrow',15)}</button></td></tr>`);const table=$('content').querySelector('tbody');if(table)table.innerHTML=rows.join('');const count=$('content').querySelector('.filter-hint');if(count)count.textContent=`${rows.length} risultati`;input.focus();try{input.setSelectionRange(position,position)}catch{}});}
  const select=$('status-filter');if(select)select.addEventListener('change',()=>{state.status=select.value;render();});
  const close=$('close-driver');if(close)close.addEventListener('click',()=>{state.selectedDriver=null;render();});
@@ -118,14 +142,15 @@ function setRole(role){if(!Object.hasOwn(ROLE_NAV,role))return;state.role=role;s
 // Role selection is deliberately a demo-only presentation tool, never an access control mechanism.
 $('role-switch').addEventListener('change',e=>setRole(e.target.value));
 document.addEventListener('click',e=>{
- const target=e.target.closest('[data-nav], [data-driver]');if(!target)return;
+ const target=e.target.closest('[data-nav], [data-driver], [data-hour-driver]');if(!target)return;
  if(target.dataset.nav){navigate(target.dataset.nav);return;}
+ if(target.dataset.hourDriver && state.role==='admin' && DEMO.drivers.some(d=>d.id===target.dataset.hourDriver)){state.hourDriver=target.dataset.hourDriver;render();$('hour-detail')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
  if(target.dataset.driver && state.role==='admin' && DEMO.drivers.some(d=>d.id===target.dataset.driver)){state.selectedDriver=target.dataset.driver;render();}
 });
 window.addEventListener('hashchange',()=>{
- const m=/^#(admin|driver)\/(dashboard|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
+ const m=/^#(admin|driver)\/(dashboard|hours|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
  if(m && ROLE_NAV[m[1]].some(x=>x[0]===m[2])){state.role=m[1];state.page=m[2];render();}
 });
-const initial=/^#(admin|driver)\/(dashboard|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
+const initial=/^#(admin|driver)\/(dashboard|hours|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
 if(initial && ROLE_NAV[initial[1]].some(x=>x[0]===initial[2])){state.role=initial[1];state.page=initial[2];}
 render();

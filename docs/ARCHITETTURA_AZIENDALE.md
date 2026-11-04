@@ -15,6 +15,7 @@ La PWA personale V1 (`/`) resta **invariata**: registrazioni manuali, archiviazi
 | Amministratore | Autista |
 | --- | --- |
 | Panoramica flotta | La mia giornata |
+| Controllo ore (demo) | — |
 | Autisti | Attività |
 | Scarichi DDD | I miei DDD |
 | Reader ESP32 | Guida e riposi (non calcolati in V2 demo) |
@@ -112,3 +113,12 @@ Il backend può essere implementato con PostgreSQL/RLS + servizio Auth + object 
 - **V2.4**: analytics guida/riposo, scadenze normative controllate e produzione.
 
 La demo NON è un archivio legale né un servizio conforme da usare in azienda; gli stati e le date sono inventati.
+
+
+## V2.1 — Monitoraggio ore e anomalie (solo demo)
+
+La sezione `/azienda/#admin/hours` aggrega **esclusivamente report inventati** (periodo demo 19 ottobre–1 novembre 2026) e segnala possibili superamenti NUMERICI di 56h settimanali, 90h su due settimane, oltre 10h nel giorno civile. Oltre 9h nel giorno civile è solo promemoria di controllo delle estensioni. I dati mancanti vengono dichiarati esplicitamente. Il modulo `azienda/hours.mjs` accetta aggregati in minuti, NON decodifica i file DDD e NON emette giudizi legali.
+
+Per calcolare infrazioni reali serviranno: carta e tachigrafo originali (quando rilevante), acquisizione completa e verificata della copertura temporale, modello UTC e timezone, periodi giornalieri di guida compresi tra riposi, pausa 4h30/45m con ripartizione 15+30, riposi giornalieri e settimanali con riduzioni e recuperi, frequenza delle estensioni 9→10h, multi-manning, deroghe, prova delle circostanze eccezionali, classificazioni legali e revisione umana. Separare preallarme e accertamento.
+
+I dati del personale non vanno pubblicati nel repository o nella pagina statica. La visibilità lato JS è SOLO dimostrativa; sul backend sarà necessario il controllo reale dei ruoli e del tenant, più audit, minimizzazione e conservazione.
