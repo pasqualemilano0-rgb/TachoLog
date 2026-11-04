@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'" />
+  <meta name="theme-color" content="#101827" />
+  <meta name="description" content="Anteprima della nuova struttura aziendale di TachoLog. Solo dati simulati." />
+  <link rel="icon" href="../icons/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>TachoLog Aziendale — Anteprima</title>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Barra laterale">
+      <a href="../" class="brand" title="Torna al TachoLog personale">
+        <span class="brand-icon">T</span>
+        <span><strong>TachoLog</strong><small>Gestione aziendale</small></span>
+      </a>
+      <div class="org-box"><span class="org-avatar">AZ</span><span><b>Azienda dimostrativa</b><small>Ambiente di anteprima</small></span></div>
+      <div class="nav-overline">NAVIGAZIONE</div>
+      <nav id="sidebar-nav" class="side-nav" aria-label="Sezioni"></nav>
+      <div class="sidebar-foot"><div class="foot-icon">i</div><div><strong>Solo dati dimostrativi</strong><small>Nessuna autenticazione o connessione ai Reader attiva.</small></div></div>
+    </aside>
+    <div class="main-stack">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-icon">T</span><span>TachoLog <b>Business</b></span></div>
+        <div class="topbar-left"><span class="crumb">GESTIONE AZIENDALE</span><span class="crumb-sep">/</span><span id="crumb-current">Panoramica</span></div>
+        <div class="topbar-actions"><span class="demo-pill">● DEMO</span><label class="view-label" for="role-switch">Vista</label><select id="role-switch" aria-label="Seleziona vista dimostrativa"><option value="admin">Amministratore demo</option><option value="driver">Autista demo</option></select></div>
+      </header>
+      <main id="content" tabindex="-1" aria-live="polite"></main>
+      <nav id="mobile-nav" class="mobile-nav" aria-label="Navigazione mobile"></nav>
+    </div>
+  </div>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
