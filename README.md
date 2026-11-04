@@ -1,3 +1,11 @@
+# TachoLog — Versione personale + anteprima aziendale
+
+**Nuovo:** apri [`/azienda/`](./azienda/) per l'anteprima V2.0 con dashboard aziendale, vista autista, sezioni autisti, scarichi, Reader, veicoli e scadenze. Mostra **solo dati inventati**: il selettore dei ruoli non è un login, e non ci sono ancora server, importazione DDD reale o Reader collegati. Consulta [Architettura aziendale](./docs/ARCHITETTURA_AZIENDALE.md).
+
+La versione originale alla radice `/` resta invariata e conserva localmente i dati personali senza cloud. Nessun dato o DDD vero deve essere inserito nell'anteprima V2.0.
+
+---
+
 # TachoLog — MVP locale 1.0 alpha
 
 Webapp PWA in italiano, senza dipendenze JavaScript esterne né tracciamento. Progetto **indipendente** da LTS Registro Viaggi.
