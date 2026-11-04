@@ -9,7 +9,7 @@ export const STATUS_CLASS = Object.freeze({
 });
 export const ROLE_NAV = Object.freeze({
   admin: [
-    ['dashboard', 'Panoramica', 'layout-dashboard'], ['drivers','Autisti','users'],
+    ['dashboard', 'Panoramica', 'layout-dashboard'], ['hours','Controllo ore','clock-3'], ['drivers','Autisti','users'],
     ['downloads','Scarichi DDD','file-down'], ['readers','Reader ESP32','radio-tower'],
     ['vehicles','Veicoli','truck'],['deadlines','Scadenze','calendar-days'],
     ['settings','Impostazioni','settings']

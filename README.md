@@ -62,3 +62,7 @@ Codice senza CDN, nessuna chiamata a servizi esterni, IndexedDB locale, backup c
 **Privacy:** i dati locali di IndexedDB non sono cifrati a riposo. Per dati personali usare un dispositivo con blocco schermo e backup cifrati. Evita l'inserimento di dati sensibili su un telefono condiviso. Non considerare gli aggiornamenti della webapp come un backup.
 
 **Stato del collaudo:** i test Node verificano solo funzioni di base e cifratura. I test Android, l'importazione analitica dei DDD, la verifica delle firme e la validazione normativa sono passaggi ancora aperti.
+
+
+## Modulo controllo ore V2.1 (demo)
+La schermata `azienda/#admin/hours` visualizza una classifica delle anomalie numeriche, il confronto 56h/90h, i dati mancanti e il dettaglio delle segnalazioni con fonti DEMO. Nessuna infrazione è accertata, nessun DDD reale è letto, nessuna pubblicazione di dati personali. Non usarla per decisioni disciplinari. Verifiche: `npm test`.
