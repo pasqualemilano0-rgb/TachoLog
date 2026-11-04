@@ -51,7 +51,7 @@ test('soglie 56 e 90: uguale al limite non è superamento',()=>{
  assert.equal(r[1].status,'nessuna-soglia-superata');
 });
 test('superamenti settimanale e bisettimanale numerici',()=>{
- const r=previewWeeklyAndWork(bothWeeks(3480,3000),windows);
+ const r=previewWeeklyAndWork(bothWeeks(3480,3480),windows);
  assert.equal(r[0].status,'possibile-anomalia');assert.equal(r[1].status,'possibile-anomalia');
 });
 test('limite lavoro 60h: guida e altri lavori, non disponibilità',()=>{
