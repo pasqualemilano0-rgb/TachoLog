@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {EU_RULES,coverageSummary} from '../azienda/eu-rules.mjs';
-import {previewContinuousDriving,previewWeeklyAndWork,normalizeTachoTimeline} from '../azienda/eu-evaluator.mjs';
+import {previewContinuousDriving as rawContinuous,previewWeeklyAndWork as rawWeekly,normalizeTachoTimeline} from '../azienda/eu-evaluator.mjs';
+const EVIDENCE={verifiedSource:true,qualifiedStartingRest:true,timelineComplete:true,workFromAllEmployers:true};
+const previewContinuousDriving=events=>rawContinuous(events,EVIDENCE);
+const previewWeeklyAndWork=(events,weeks)=>rawWeekly(events,weeks,EVIDENCE);
 const iso=(start,minutes)=>new Date(Date.parse(start)+minutes*60000).toISOString();
 function chain(start,sections){
  let point=start;
