@@ -1,3 +1,5 @@
+> **V2.4 — Normativa UE:** nuova sezione amministratore con catalogo delle verifiche UE e quattro precontrolli su timeline normalizzate. Nessun DDD reale decodificato, nessuna infrazione accertata. Dettagli in `docs/NORMATIVA_UE.md`.
+
 > **V2.2 Design System:** disponibile l’interfaccia aziendale professionale in `azienda/professional.css` e la specifica `docs/DESIGN_SYSTEM_V2_2.md`. L’area `/azienda/` resta una **demo senza autenticazione e con soli dati inventati**. Il TachoLog personale è invariato.
 
 # TachoLog — Versione personale + anteprima aziendale

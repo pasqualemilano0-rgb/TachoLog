@@ -197,3 +197,16 @@ tbody tr:hover{background:#fafcff}
  .chart-svg{min-width:0}.chart-legend{font-size:10px;gap:8px 12px;padding:0 8px}
  .chart-note{font-size:10px;padding:0 8px}.chart-overview .panel-head,.chart-columns .panel-head{gap:8px}
 }
+
+/* V2.4 — Copertura normativa e stati espliciti. */
+.regulation-alert{padding:18px 21px;background:#fff8eb;border:1px solid #f0dab8;border-radius:12px;color:#80561f;margin:22px 0 18px}
+.regulation-alert b{font-size:13px}.regulation-alert p{margin:8px 0 0;font-size:12px;line-height:1.7}
+.rule-id{font-size:11px;letter-spacing:.2px;color:#294a7c;font-weight:800}
+.regulation-flow{background:#fff;border:1px solid #e5ebf3;border-radius:15px;padding:20px 23px;margin:18px 0}
+.regulation-flow h2{font-size:16px;margin:0 0 14px}
+.regulation-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.regulation-steps span{padding:14px 10px;border-radius:10px;background:#eef3fd;color:#405a83;font-size:11px;line-height:1.45;font-weight:680;text-align:center}
+.rule-links{display:flex;gap:10px;flex-wrap:wrap;padding:20px}
+.rule-links a{font-size:12px;color:#2454b4;padding:9px 13px;border:1px solid #d4e2fd;border-radius:9px;background:#f6f9ff;text-decoration:underline}
+@media(max-width:1100px){.regulation-steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.regulation-steps{grid-template-columns:1fr 1fr}.regulation-flow{padding:17px}.regulation-steps span{padding:11px 7px}.rule-links{padding:14px}}
