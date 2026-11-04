@@ -49,7 +49,7 @@ export function previewDailyDriving(periods,context={}){
  const covered=Array.isArray(context.completeWeeks)&&
    weeks.every(w=>context.completeWeeks.includes(w))&&
    context.completeWeeks.every(w=>WEEK.test(w)&&new Date(w+'T00:00:00Z').getUTCDay()===1);
- const trusted=context.evidenceTrusted===true &&
+ const trusted=sorted.length>0 && context.evidenceTrusted===true &&
    context.restBoundariesValidated===true &&
    context.periodSequenceComplete===true &&covered;
  const reason=!trusted?
