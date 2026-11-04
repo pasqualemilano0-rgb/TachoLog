@@ -6,10 +6,10 @@
 export const HOUR_LIMITS = Object.freeze({weekly:56*60,fortnight:90*60,dailyOrdinary:9*60,dailyAbsolute:10*60});
 export const HOURS_DEMO_PERIOD=Object.freeze({previous:'19–25 ott 2026',current:'26 ott–1 nov 2026',fortnight:'19 ott–1 nov 2026'});
 export const HOURS_DEMO = Object.freeze([
-  {driverId:'drv-001',organizationId:'org-demo',weeklyMinutes:2535,previousWeekMinutes:2310,maxCivilDayMinutes:520,complete:true,source:'esempio',notes:'Dati inventati: nessuna anomalia nelle soglie numeriche considerate.'},
-  {driverId:'drv-002',organizationId:'org-demo',weeklyMinutes:3490,previousWeekMinutes:2190,maxCivilDayMinutes:635,complete:true,source:'esempio',notes:'Valori volutamente fuori soglia per mostrare la coda di revisione.'},
-  {driverId:'drv-003',organizationId:'org-demo',weeklyMinutes:3265,previousWeekMinutes:null,maxCivilDayMinutes:570,complete:false,source:'esempio',notes:'Manca la settimana precedente: non si può verificare il limite bisettimanale.'},
-  {driverId:'drv-004',organizationId:'org-demo',weeklyMinutes:null,previousWeekMinutes:null,maxCivilDayMinutes:null,complete:false,source:'assente',notes:'Non sono disponibili attività da analizzare.'}
+  {driverId:'drv-001',organizationId:'org-demo',demoDailyMinutes:[520,410,390,375,350,285,205],weeklyMinutes:2535,previousWeekMinutes:2310,maxCivilDayMinutes:520,complete:true,source:'esempio',notes:'Dati inventati: nessuna anomalia nelle soglie numeriche considerate.'},
+  {driverId:'drv-002',organizationId:'org-demo',demoDailyMinutes:[635,600,520,510,470,405,350],weeklyMinutes:3490,previousWeekMinutes:2190,maxCivilDayMinutes:635,complete:true,source:'esempio',notes:'Valori volutamente fuori soglia per mostrare la coda di revisione.'},
+  {driverId:'drv-003',organizationId:'org-demo',demoDailyMinutes:[570,530,490,480,465,400,330],weeklyMinutes:3265,previousWeekMinutes:null,maxCivilDayMinutes:570,complete:false,source:'esempio',notes:'Manca la settimana precedente: non si può verificare il limite bisettimanale.'},
+  {driverId:'drv-004',organizationId:'org-demo',demoDailyMinutes:null,weeklyMinutes:null,previousWeekMinutes:null,maxCivilDayMinutes:null,complete:false,source:'assente',notes:'Non sono disponibili attività da analizzare.'}
 ]);
 const valid = n => n === null || Number.isSafeInteger(n) && n >= 0;
 export function minutesLabel(n){if(n===null || n===undefined)return '—';return `${Math.floor(n/60)}h ${String(n%60).padStart(2,'0')}m`;}

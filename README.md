@@ -68,3 +68,8 @@ Codice senza CDN, nessuna chiamata a servizi esterni, IndexedDB locale, backup c
 
 ## Modulo controllo ore V2.1 (demo)
 La schermata `azienda/#admin/hours` visualizza una classifica delle anomalie numeriche, il confronto 56h/90h, i dati mancanti e il dettaglio delle segnalazioni con fonti DEMO. Nessuna infrazione è accertata, nessun DDD reale è letto, nessuna pubblicazione di dati personali. Non usarla per decisioni disciplinari. Verifiche: `npm test`.
+
+
+## V2.3 — Grafici dei tempi di guida (demo)
+
+La dashboard aziendale mostra un **grafico a barre delle ore settimanali per autista**. La sezione `Controllo ore` include confronti settimanali e bisettimanali con soglie numeriche indicative, più un **grafico di andamento giornaliero** nel dettaglio conducente. I dati mancanti sono mostrati come N/D, non come zero e non come conformità. I 7 valori giornalieri sono totalmente inventati e hanno la stessa somma del totale settimanale demo. Nessun DDD viene decodificato e nessuna infrazione è accertata automaticamente. L'app personale / resta invariata.

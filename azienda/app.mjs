@@ -1,3 +1,4 @@
+import {barChart,dailyChart} from './charts.mjs';
 import {DEMO,ROLE_NAV,STATUS_LABELS,STATUS_CLASS,visibleDrivers,visibleDownloads,searchDrivers,filterDownloads,dueLabel} from './model.mjs';
 import {HOURS_DEMO,HOURS_DEMO_PERIOD,HOUR_LIMITS,HOUR_STATUS,minutesLabel,summarizeFleetHours} from './hours.mjs';
 
@@ -34,12 +35,21 @@ const shortDate = v => new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'2-d
 const driverName = id => DEMO.drivers.find(d=>d.id===id)?.label||'Non associato';
 const badge = (text, tone='neutral') => `<span class="status ${esc(tone)}"><span class="status-dot"></span>${esc(text)}</span>`;
 const banner = () => `<div class="demo-banner" role="note">${icon('alert',18)}<span><strong>Anteprima con dati inventati.</strong> Il cambio di vista non è un login. Nessun file DDD reale viene letto, inviato o archiviato.</span></div>`;
-const kicker=(top,title,description)=>`<div class="page-heading"><div><span class="eyebrow">${esc(top)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div><span class="heading-tag">BUSINESS · V2.2</span></div>`;
+const kicker=(top,title,description)=>`<div class="page-heading"><div><span class="eyebrow">${esc(top)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div><span class="heading-tag">BUSINESS · V2.3</span></div>`;
 const panel = (heading,sub,content,extra='') => `<section class="panel"><div class="panel-head"><div><h2>${heading}</h2>${sub?`<p>${sub}</p>`:''}</div>${extra}</div>${content}</section>`;
 const metric=(label,value,meta,iconName,accent='')=>`<article class="kpi ${accent}"><div class="kpi-line"><span>${esc(label)}</span><span class="kpi-icon">${icon(iconName,20)}</span></div><strong>${esc(value)}</strong><small>${esc(meta)}</small></article>`;
 const tableWrap = (headers,rows,empty='Nessun elemento da mostrare') => rows.length
   ? `<div class="table-scroll"><table><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`
   : `<div class="empty">${icon('archive',30)}<p>${esc(empty)}</p></div>`;
+function chartsForFleet(reports,compact=false){
+  const weekly=barChart(reports.rows,DEMO.drivers,{key:'weeklyMinutes',limit:HOUR_LIMITS.weekly,label:'Guida settimanale per autista'});
+  if(compact)return `<div class="chart-overview">${panel('Ore di guida per autista','Confronto settimanale · solo esempi, non controlli normativi',weekly,`<button type="button" class="link-btn" data-nav="hours">Analisi completa ${icon('arrow',15)}</button>`)}</div>`;
+  const fortnight=barChart(reports.rows,DEMO.drivers,{key:'fortnightMinutes',limit:HOUR_LIMITS.fortnight,label:'Guida su due settimane per autista'});
+  return `<div class="chart-columns">${panel('Guida settimanale','Riferimento numerico: 56 ore',weekly)}${panel('Guida su due settimane','Riferimento numerico: 90 ore; N/D se manca una settimana',fortnight)}</div>`;
+}
+function chartForDriver(report){
+  return `<div class="chart-overview">${panel('Andamento giornaliero · '+safeXml(DEMO.drivers.find(d=>d.id===report.driverId)?.label||'Autista'),'Settimana '+safeXml(HOURS_DEMO_PERIOD.current)+' · solo dati inventati',dailyChart(report))}</div>`;
+}
 function renderAdminDashboard(){
   const recent=DEMO.downloads.slice().sort((a,b)=>b.timestamp.localeCompare(a.timestamp));
   const rows=recent.map(f=>`<tr><td><b>${esc(driverName(f.driverId))}</b><span class="table-muted">${esc(f.source)}</span></td><td>${dateFmt(f.timestamp)}</td><td>${badge(STATUS_LABELS[f.status],STATUS_CLASS[f.status])}</td><td><button type="button" class="link-btn" data-nav="downloads">Apri ${icon('arrow',15)}</button></td></tr>`);
@@ -53,6 +63,7 @@ function renderAdminDashboard(){
   return kicker('CONTROLLO FLOTTA','Panoramica aziendale','Una vista operativa di conducenti, scarichi e dati da esaminare. Tutti i valori sono simulati.')+banner()+
     `<section class="fleet-hero" aria-label="Accesso al controllo ore"><div class="fleet-hero-main"><span class="fleet-hero-eyebrow">CENTRO OPERATIVO / TACHOLOG BUSINESS</span><h2>Le priorità della flotta.<br><span>Tutto sotto controllo, in una vista.</span></h2><p>Consulta segnalazioni, intervalli disponibili e stato degli scarichi. Le anomalie richiedono sempre una verifica.</p><button type="button" class="hero-action" data-nav="hours">Esamina il controllo ore ${icon('arrow',18)}</button></div><div class="hero-signal" aria-hidden="true"><span class="hero-signal-ring">${icon('activity',48)}</span><strong>${reports.summary.candidates+reports.summary.review+reports.summary.incomplete}</strong><small>posizioni da esaminare<br>nella simulazione</small></div></section>`+
     `<div class="kpi-grid">${metric('Conducenti in elenco',DEMO.drivers.length,'Anagrafica dimostrativa','users')}${metric('Scarichi DDD',DEMO.downloads.length,'Nessun file reale','file-down')}${metric('Reader previsti',DEMO.readers.length,'Da collegare','radio-tower')}${metric('Scadenze da verificare',check.length,'Dati di esempio','calendar-days','amber')}</div>`+
+    chartsForFleet(reports,true)+
     `<div class="two-columns operations-grid">${panel('Situazioni da controllare','La priorità deriva soltanto da dati simulati',`<div class="priority-list">${attention||'<p>Nessuna segnalazione di esempio</p>'}</div>`,`<button class="link-btn" type="button" data-nav="hours">Tutti gli autisti ${icon('arrow',15)}</button>`)}`+
     `${panel('Ultimi scarichi DDD','Registro dimostrativo, nessun file autentico',tableWrap(['Autista','Data','Stato',''],rows),`<button class="link-btn" type="button" data-nav="downloads">Archivio ${icon('arrow',15)}</button>`)}</div>`+
     `<div class="process-strip"><div class="process-mark">${icon('shield',22)}</div><div><b>Pronto per la prossima fase di sviluppo</b><p>Accessi aziendali, archivio privato DDD e verifiche normative saranno attivati solo dopo i collaudi.</p></div><button type="button" class="secondary-btn" data-nav="readers">Vedi i Reader</button></div>`;
@@ -72,9 +83,11 @@ function renderHours(){
   return kicker('MONITORAGGIO CONDUCENTI','Controllo ore e segnalazioni','Confronto dei tempi di guida, anomalie da verificare e periodi non coperti dagli scarichi.')+banner()+
     `<div class="kpi-grid">${metric('Possibili superamenti',results.summary.candidates,'Richiedono verifica manuale','alert','amber')}${metric('Altre segnalazioni',results.summary.review,'Soglie vicine o estensioni','clock-3')}${metric('Dati incompleti',results.summary.incomplete,'Non classificare come regolari','archive','amber')}${metric('Senza anomalie numeriche',results.summary.withoutSignals,'Non significa conformità','shield')}</div>`+
     `<div class="hours-warning">${icon('shield',20)}<div><b>Non sono infrazioni accertate.</b><p>I valori sono inventati per la demo. Il giorno civile non equivale al periodo giornaliero legale. Pause, riposi, estensioni, deroghe e firme DDD non sono verificati. Non usare questa pagina per contestazioni o provvedimenti.</p></div></div>`+
+    chartsForFleet(results)+
     `<div class="filters"><label class="select-filter">Mostra <select id="hour-filter" aria-label="Filtra autisti per segnalazione">${Object.entries(filters).map(([k,v])=>`<option value="${k}" ${state.hourFilter===k?'selected':''}>${v}</option>`).join('')}</select></label><span class="filter-hint">${rows.length} autisti su ${results.rows.length}</span></div>`+
     panel('Situazione ore per autista',`Settimana ${HOURS_DEMO_PERIOD.current} · Due settimane ${HOURS_DEMO_PERIOD.fortnight}`,`<div class="table-swipe">Scorri a sinistra per vedere tutte le colonne →</div>`+tableWrap(['Autista','Guida settimana / 56h','Guida due settimane / 90h','Giorno civile massimo','Esito preliminare',''],tableRows,'Nessun autista con questo filtro.'))+
     (selected?`<section class="hours-detail" id="hour-detail"><div class="hours-detail-header"><div><span class="eyebrow">DETTAGLIO DIMOSTRATIVO</span><h2>${esc(driver?.label)}</h2><p>Ultima settimana: ${minutesLabel(selected.weeklyMinutes)} · Precedente: ${minutesLabel(selected.previousWeekMinutes)}</p></div><button type="button" class="secondary-btn" id="close-hour-detail">Chiudi</button></div><div class="hour-findings">${selected.issues.length?selected.issues.map(issue=>`<article><span class="status ${issue.priority==='high'?'bad':'pending'}">${issue.priority==='high'?'Da verificare':issue.priority==='missing'?'Dati insufficienti':'Promemoria'}</span><div><b>${esc(issue.label)}</b><p>${esc(issue.explain)}</p></div></article>`).join(''):'<p>Nessuna soglia numerica di questa demo superata. Non implica conformità.</p>'}</div><p class="hour-provenance">Fonte: simulazione · ${esc(selected.notes)}. Il software non ha ancora un decoder DDD certificato o un motore di conformità completo.</p></section>`:'')+
+    (selected?chartForDriver(selected):'')+
     `<div class="hours-next">${icon('file-down',20)}<div><b>Per calcolare situazioni reali servono DDD decodificati e verificati.</b><p>Il prossimo passo è collegare un backend privato con dati completi, ricostruzione dei periodi legali, revisione umana e tracciamento delle giustificazioni.</p></div></div>`;
 }
 function renderDrivers(){

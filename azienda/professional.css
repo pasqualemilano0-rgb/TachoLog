@@ -164,3 +164,36 @@ tbody tr:hover{background:#fafcff}
 
 .table-swipe{display:none;color:#687e9d;font-size:11px;font-weight:700;padding:10px 16px 0}
 @media(max-width:760px){.table-swipe{display:block}}
+
+/* V2.3 - Grafici SVG responsive con etichette accessibili e stati dati espliciti. */
+.chart-overview{margin:22px 0}
+.chart-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0}
+.chart-overview .panel,.chart-columns .panel{margin:0;min-width:0}
+.data-chart{padding:16px 20px 19px}
+.chart-svg{width:100%;height:auto;max-height:330px;display:block;overflow:visible}
+.chart-grid-line{stroke:#e9eef6;stroke-width:1}
+.chart-tick{fill:#7a889d;font-size:12px}
+.chart-x-label{fill:#55657b;font-size:12px;font-weight:650}
+.chart-value{fill:#283a54;font-size:12px;font-weight:750}
+.chart-limit-line{stroke:#e3a349;stroke-width:2;stroke-dasharray:7 6}
+.chart-limit-text{fill:#a56e24;font-size:12px;font-weight:730}
+.chart-bar.is-base{fill:#4471db}
+.chart-bar.is-over{fill:#d65763}
+.chart-bar.is-partial{fill:#e6aa4d}
+.chart-no-data{font-size:14px;fill:#9ba5b3;font-weight:700}
+.chart-line{fill:none;stroke:#4471db;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.chart-dot{fill:#fff;stroke:#4471db;stroke-width:4}
+.chart-legend{display:flex;gap:9px 17px;align-items:center;flex-wrap:wrap;margin-top:4px;color:#657389;font-size:11px}
+.chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;background:#4471db}
+.swatch.over{background:#d65763}.swatch.partial{background:#e6aa4d}
+.swatch.limit{width:16px;height:0;border-top:2px dashed #e3a349;background:none;border-radius:0}
+.chart-note{font-size:11px;color:#8b6672;line-height:1.5;margin:13px 0 0}
+.chart-empty{padding:30px 16px;color:#7e889a;text-align:center}
+@media(max-width:1180px){.chart-columns{grid-template-columns:1fr}}
+@media(max-width:760px){
+ .chart-overview{margin:14px 0}.chart-columns{gap:12px;margin:14px 0}
+ .data-chart{padding:9px 10px 14px}
+ .chart-svg{min-width:0}.chart-legend{font-size:10px;gap:8px 12px;padding:0 8px}
+ .chart-note{font-size:10px;padding:0 8px}.chart-overview .panel-head,.chart-columns .panel-head{gap:8px}
+}
