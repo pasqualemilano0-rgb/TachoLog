@@ -1,9 +1,11 @@
+import {regulationsView} from './regulations-view.mjs';
+import {coverageSummary} from './eu-rules.mjs';
 import {barChart,dailyChart} from './charts.mjs';
 import {DEMO,ROLE_NAV,STATUS_LABELS,STATUS_CLASS,visibleDrivers,visibleDownloads,searchDrivers,filterDownloads,dueLabel} from './model.mjs';
 import {HOURS_DEMO,HOURS_DEMO_PERIOD,HOUR_LIMITS,HOUR_STATUS,minutesLabel,summarizeFleetHours} from './hours.mjs';
 
 const $ = id => document.getElementById(id);
-const state = {role:'admin',page:'dashboard',search:'',status:'all',selectedDriver:null,hourFilter:'all',hourDriver:null};
+const state = {role:'admin',page:'dashboard',search:'',status:'all',selectedDriver:null,hourFilter:'all',hourDriver:null,ruleGroup:'Tutte'};
 const DEMO_SESSION = role => ({role, orgId:DEMO.org.id, driverId:'drv-001', drivers:DEMO.drivers});
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const icon = (name,size=19) => {
@@ -35,7 +37,7 @@ const shortDate = v => new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'2-d
 const driverName = id => DEMO.drivers.find(d=>d.id===id)?.label||'Non associato';
 const badge = (text, tone='neutral') => `<span class="status ${esc(tone)}"><span class="status-dot"></span>${esc(text)}</span>`;
 const banner = () => `<div class="demo-banner" role="note">${icon('alert',18)}<span><strong>Anteprima con dati inventati.</strong> Il cambio di vista non è un login. Nessun file DDD reale viene letto, inviato o archiviato.</span></div>`;
-const kicker=(top,title,description)=>`<div class="page-heading"><div><span class="eyebrow">${esc(top)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div><span class="heading-tag">BUSINESS · V2.3</span></div>`;
+const kicker=(top,title,description)=>`<div class="page-heading"><div><span class="eyebrow">${esc(top)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div><span class="heading-tag">BUSINESS · V2.4</span></div>`;
 const panel = (heading,sub,content,extra='') => `<section class="panel"><div class="panel-head"><div><h2>${heading}</h2>${sub?`<p>${sub}</p>`:''}</div>${extra}</div>${content}</section>`;
 const metric=(label,value,meta,iconName,accent='')=>`<article class="kpi ${accent}"><div class="kpi-line"><span>${esc(label)}</span><span class="kpi-icon">${icon(iconName,20)}</span></div><strong>${esc(value)}</strong><small>${esc(meta)}</small></article>`;
 const tableWrap = (headers,rows,empty='Nessun elemento da mostrare') => rows.length
@@ -90,6 +92,7 @@ function renderHours(){
     (selected?chartForDriver(selected):'')+
     `<div class="hours-next">${icon('file-down',20)}<div><b>Per calcolare situazioni reali servono DDD decodificati e verificati.</b><p>Il prossimo passo è collegare un backend privato con dati completi, ricostruzione dei periodi legali, revisione umana e tracciamento delle giustificazioni.</p></div></div>`;
 }
+function renderRegulations(){return regulationsView({group:state.ruleGroup,esc,banner,kicker,panel,metric,tableWrap,badge});}
 function renderDrivers(){
  const drivers=searchDrivers(visibleDrivers(DEMO.drivers,DEMO_SESSION('admin')),state.search);
  const selected=DEMO.drivers.find(x=>x.id===state.selectedDriver);
@@ -138,7 +141,7 @@ function renderRest(){return kicker('MONITORAGGIO','Guida e riposi','Riepiloghi 
 function renderSettings(){return kicker('ACCOUNT',state.role==='admin'?'Impostazioni aziendali':'Il mio profilo','Le credenziali e i permessi saranno disponibili con l’autenticazione server.')+banner()+panel('Prima la sicurezza','Funzioni essenziali per il rilascio aziendale',`<div class="security-list"><div>${icon('lock')}<span>Login con sessioni sicure e ruoli verificati sul server</span></div><div>${icon('shield')}<span>Isolamento dei dati per azienda e per autista</span></div><div>${icon('archive')}<span>Archiviazione privata e backup dei file DDD originali</span></div><div>${icon('activity')}<span>Audit log, revoca dispositivi e protezioni contro abusi</span></div></div>`)+`<div class="callout spacious">${icon('alert')} Non usare dati reali in questa anteprima pubblica.</div>`;}
 function view(){
  if(state.role==='driver')return state.page==='activities'?renderDriverActivities():state.page==='downloads'?renderDownloads():state.page==='rest'?renderRest():state.page==='settings'?renderSettings():renderDriverDashboard();
- switch(state.page){case'hours':return renderHours();case'drivers':return renderDrivers();case'downloads':return renderDownloads();case'readers':return renderReaders();case'vehicles':return renderVehicles();case'deadlines':return renderDeadlines();case'settings':return renderSettings();default:return renderAdminDashboard();}
+ switch(state.page){case'hours':return renderHours();case'regulations':return renderRegulations();case'drivers':return renderDrivers();case'downloads':return renderDownloads();case'readers':return renderReaders();case'vehicles':return renderVehicles();case'deadlines':return renderDeadlines();case'settings':return renderSettings();default:return renderAdminDashboard();}
 }
 function navMarkup(item){const [id,label,glyph]=item;return `<button type="button" class="nav-item ${state.page===id?'active':''}" data-nav="${id}" ${state.page===id?'aria-current="page"':''}>${icon(glyph,18)}<span>${esc(label)}</span></button>`;}
 function render(){
@@ -152,6 +155,7 @@ function render(){
 }
 function navigate(page){if(!ROLE_NAV[state.role].some(x=>x[0]===page))return;state.page=page;state.selectedDriver=null;state.hourDriver=null;location.hash=`${state.role}/${page}`;render();window.scrollTo(0,0);}
 function bindPage(){
+ const rf=$('rule-filter');if(rf)rf.addEventListener('change',()=>{state.ruleGroup=rf.value;render();});
  const hourFilter=$('hour-filter');if(hourFilter)hourFilter.addEventListener('change',()=>{state.hourFilter=hourFilter.value;state.hourDriver=null;render();});
  const closeHour=$('close-hour-detail');if(closeHour)closeHour.addEventListener('click',()=>{state.hourDriver=null;render();});
  const input=$('driver-search');if(input){input.addEventListener('input',()=>{const position=input.selectionStart;state.search=input.value;const rows=searchDrivers(visibleDrivers(DEMO.drivers,DEMO_SESSION('admin')),state.search).map(d=>`<tr><td><b>${esc(d.label)}</b><span class="table-muted">${esc(d.code)}</span></td><td>${esc(d.vehicle)}</td><td>${d.downloadDue?shortDate(`${d.downloadDue}T12:00:00`):'Non disponibile'}</td><td>${badge(d.active?'Attivo':'Disattivato',d.active?'good':'neutral')}</td><td><button class="link-btn" type="button" data-driver="${esc(d.id)}">Dettagli ${icon('arrow',15)}</button></td></tr>`);const table=$('content').querySelector('tbody');if(table)table.innerHTML=rows.join('');const count=$('content').querySelector('.filter-hint');if(count)count.textContent=`${rows.length} risultati`;input.focus();try{input.setSelectionRange(position,position)}catch{}});}
@@ -168,9 +172,9 @@ document.addEventListener('click',e=>{
  if(target.dataset.driver && state.role==='admin' && DEMO.drivers.some(d=>d.id===target.dataset.driver)){state.selectedDriver=target.dataset.driver;render();}
 });
 window.addEventListener('hashchange',()=>{
- const m=/^#(admin|driver)\/(dashboard|hours|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
+ const m=/^#(admin|driver)\/(dashboard|hours|regulations|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
  if(m && ROLE_NAV[m[1]].some(x=>x[0]===m[2])){state.role=m[1];state.page=m[2];render();}
 });
-const initial=/^#(admin|driver)\/(dashboard|hours|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
+const initial=/^#(admin|driver)\/(dashboard|hours|regulations|drivers|activities|downloads|readers|vehicles|deadlines|rest|settings)$/.exec(location.hash);
 if(initial && ROLE_NAV[initial[1]].some(x=>x[0]===initial[2])){state.role=initial[1];state.page=initial[2];}
 render();
