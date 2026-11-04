@@ -43,3 +43,8 @@ I dati del tachigrafo sono personali. Se l'azienda li usa per verificare il risp
 4. Motore 2002/15/CE, integrazione nazionale e documentazione di lavoro esterno.
 5. Gravità ufficiale, rischi e dashboard per controlli e debrief con revisione.
 6. Riesame legale e collaudo prima di attivare segnalazioni reali.
+
+
+## V2.5b — Default fail-closed dei precontrolli
+
+I quattro precontrolli originari NON emettono più `nessuna-soglia-superata` senza attestazione esplicita di provenienza DDD verificata e copertura temporale. La guida continuativa richiede anche un riposo qualificante iniziale. Il precontrollo 60h di lavoro richiede copertura delle attività presso eventuali altri datori. Un flag è un **contratto con il backend**, NON una prova crittografica e non va ricavato dal browser pubblico. I test storici usano un contesto di laboratorio esplicito; nuovi test verificano il comportamento prudente predefinito. L'interfaccia continua a utilizzare dati inventati.

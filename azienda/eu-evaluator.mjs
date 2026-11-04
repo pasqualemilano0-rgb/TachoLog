@@ -33,7 +33,7 @@ const outcome=(id,minutes,limit,possible,reason)=>({
  minutes,limit,reason,
  issues:possible?[{code:id,extraMinutes:minutes-limit}]:[]
 });
-export function previewContinuousDriving(input){
+export function previewContinuousDriving(input,evidence={}){
  const id='EU-561-07';
  const rows=normalizeTachoTimeline(input);
  if(!rows.length)return unknown(id,'Nessuna attività disponibile');
@@ -50,9 +50,13 @@ export function previewContinuousDriving(input){
   // Altri lavori e disponibilità NON azzerano la guida.
   lastEnd=r.end;
  }
- return {id,status:issues.length?'possibile-anomalia':gap?'non-valutabile':'nessuna-soglia-superata',
-  minutes:maxSeen,limit:270,issues,
-  reason:gap?'Sono presenti vuoti nella timeline: i periodi assenti possono cambiare il risultato.':'Controllo preliminare della sequenza 4h30 / 45 o 15+30; verificare qualificazione effettiva delle pause.'};
+ const trusted=evidence?.verifiedSource===true &&
+   evidence?.qualifiedStartingRest===true && evidence?.timelineComplete===true && !gap;
+ return {id,status:!trusted?'non-valutabile':issues.length?'possibile-anomalia':'nessuna-soglia-superata',
+  trustedInput:trusted,minutes:maxSeen,limit:270,issues,
+  reason:gap?'Sono presenti vuoti nella timeline: i periodi assenti possono cambiare il risultato.':!trusted?
+   'Manca prova di firma, riposo iniziale o copertura completa: nessun esito automatico.':
+   'Controllo preliminare della sequenza 4h30 / 45 o 15+30; verificare deroghe e qualificazione delle pause.'};
 }
 const windowCoverage=(events,start,end)=>{
  let cursor=start;
@@ -69,7 +73,7 @@ const sum=(rows,start,end,types)=>{
  for(const r of rows)if(types.has(r.type))total+=Math.max(0,Math.min(end,r.end)-Math.max(start,r.start))/60000;
  return total;
 };
-export function previewWeeklyAndWork(input,weekWindows){
+export function previewWeeklyAndWork(input,weekWindows,evidence={}){
  const rows=normalizeTachoTimeline(input);
  if(!Array.isArray(weekWindows)||weekWindows.length<1||weekWindows.length>2)
   throw new Error('Indicare una o due settimane legali consecutive');
@@ -81,13 +85,14 @@ export function previewWeeklyAndWork(input,weekWindows){
  });
  if(windows.length===2 && windows[0].end!==windows[1].start)throw new Error('Settimane non consecutive');
  const current=windows[windows.length-1];
- const weeklyKnown=windowCoverage(rows,current.start,current.end);
+ const sourceTrusted=evidence?.verifiedSource===true && evidence?.timelineComplete===true;
+ const weeklyKnown=sourceTrusted && windowCoverage(rows,current.start,current.end);
  const driving=new Set(['drive']),working=new Set(['drive','work']);
  const weekDrive=weeklyKnown?sum(rows,current.start,current.end,driving):null;
  const weekWork=weeklyKnown?sum(rows,current.start,current.end,working):null;
  const weekResult=weeklyKnown?outcome('EU-561-06-W',weekDrive,3360,weekDrive>3360,'Settimana civile completa fornita dal chiamante; verificare fuso, deroghe e applicabilità.'):unknown('EU-561-06-W','Settimana incompleta o dati non disponibili');
- const workResult=weeklyKnown?outcome('EU-2002-15-W60',weekWork,3600,weekWork>3600,'Conteggia guida + altri lavori; verificare altri datori di lavoro e norme nazionali.'):unknown('EU-2002-15-W60','Settimana lavorativa incompleta o dati mancanti');
- const both=windows.length===2&&windows.every(w=>windowCoverage(rows,w.start,w.end));
+ const workResult=(weeklyKnown && evidence?.workFromAllEmployers===true)?outcome('EU-2002-15-W60',weekWork,3600,weekWork>3600,'Conteggia guida + altri lavori; verificare altri datori di lavoro e norme nazionali.'):unknown('EU-2002-15-W60','Settimana incompleta o attività di altri datori di lavoro non attestate');
+ const both=sourceTrusted && windows.length===2&&windows.every(w=>windowCoverage(rows,w.start,w.end));
  const total=both?sum(rows,windows[0].start,current.end,driving):null;
  const fortnight=both?outcome('EU-561-06-2W',total,5400,total>5400,'Due settimane consecutive; verificare gli altri fattori normativi.'):unknown('EU-561-06-2W','Sono richieste due settimane consecutive e complete');
  return [weekResult,fortnight,workResult];
