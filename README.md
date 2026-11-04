@@ -1,3 +1,5 @@
+> **V2.2 Design System:** disponibile l’interfaccia aziendale professionale in `azienda/professional.css` e la specifica `docs/DESIGN_SYSTEM_V2_2.md`. L’area `/azienda/` resta una **demo senza autenticazione e con soli dati inventati**. Il TachoLog personale è invariato.
+
 # TachoLog — Versione personale + anteprima aziendale
 
 **Nuovo:** apri [`/azienda/`](./azienda/) per l'anteprima V2.0 con dashboard aziendale, vista autista, sezioni autisti, scarichi, Reader, veicoli e scadenze. Mostra **solo dati inventati**: il selettore dei ruoli non è un login, e non ci sono ancora server, importazione DDD reale o Reader collegati. Consulta [Architettura aziendale](./docs/ARCHITETTURA_AZIENDALE.md).
